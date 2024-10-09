@@ -10,4 +10,9 @@ class TaskListRepository extends BaseRepository
     {
         parent::__construct($taskList);
     }
+
+    public function withTasks($id)
+    {
+        return $this->model->with('tasks')->findOrFail($id);
+    }
 }
