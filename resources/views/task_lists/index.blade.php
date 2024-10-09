@@ -40,10 +40,10 @@
                                     <td class="py-2 px-4">{{ $taskList->description }}</td>
                                     <td class="py-2 px-4 flex space-x-2">
                                         <a href="{{ route('task-lists.edit', $taskList->id) }}" class="text-blue-500 hover:text-blue-700">Editar</a>
-                                        <form action="{{ route('task-lists.destroy', $taskList->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta lista?');">
+                                        <form action="{{ route('task-lists.destroy', $taskList->id) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-red-500 hover:text-red-700">Eliminar</button>
+                                            <button type="button" class="text-red-500 hover:text-red-700 delete-button">Eliminar</button>
                                         </form>
                                     </td>
                                 </tr>
