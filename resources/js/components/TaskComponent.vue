@@ -37,6 +37,9 @@
 import Swal from 'sweetalert2';
 import { ref, onMounted } from 'vue';
 
+axios.defaults.withCredentials = true;
+axios.defaults.withXSRFToken = true;
+
 export default {
   props: {
     taskList: Object,
@@ -72,7 +75,7 @@ export default {
       // Si el usuario confirma, proceder a eliminar la tarea
       if (result.isConfirmed) {
         try {
-          let response = await axios.delete(`/tasks/${taskId}`);
+          let response = await axios.delete(`/api/tasks/${taskId}`);
 
           // Verifica si la respuesta es exitosa
           if (response.status === 200) {
@@ -109,9 +112,9 @@ export default {
       try {
         let response;
         if (props.isEditing) {
-          response = await axios.put(`/task-lists/${props.taskList.id}`, data);
+          response = await axios.put(`/api/task-lists/${props.taskList.id}`, data);
         } else {
-          response = await axios.post('/task-lists', data);
+          response = await axios.post('/api/task-lists', data);
         }
 
         await Swal.fire({

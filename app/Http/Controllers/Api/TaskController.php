@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Repositories\TaskRepository;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Exception;
 
 class TaskController extends Controller
