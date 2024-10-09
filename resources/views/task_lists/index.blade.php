@@ -25,31 +25,38 @@
                         <a href="{{ route('task-lists.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Crear Nueva Lista</a>
                     </div>
 
-                    <table class="min-w-full bg-white border border-gray-300">
-                        <thead>
-                            <tr class="bg-gray-200">
-                                <th class="py-2 px-4 border-b text-left text-gray-600">Nombre de la Lista</th>
-                                <th class="py-2 px-4 border-b text-left text-gray-600">Descripción</th>
-                                <th class="py-2 px-4 border-b text-left text-gray-600">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($taskLists as $taskList)
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="py-2 px-4">{{ $taskList->name }}</td>
-                                    <td class="py-2 px-4">{{ $taskList->description }}</td>
-                                    <td class="py-2 px-4 flex space-x-2">
-                                        <a href="{{ route('task-lists.edit', $taskList->id) }}" class="text-blue-500 hover:text-blue-700">Editar</a>
-                                        <form class="delete-form" action="{{ route('task-lists.destroy', $taskList->id) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="button" class="text-red-500 hover:text-red-700 delete-button">Eliminar</button>
-                                        </form>
-                                    </td>
+                    {{-- Validación para mostrar un mensaje si no hay registros --}}
+                    @if($taskLists->isEmpty())
+                        <div class="p-4 text-gray-600 bg-gray-100 border border-gray-300 rounded">
+                            No hay listas de tareas disponibles.
+                        </div>
+                    @else
+                        <table class="min-w-full bg-white border border-gray-300">
+                            <thead>
+                                <tr class="bg-gray-200">
+                                    <th class="py-2 px-4 border-b text-left text-gray-600">Nombre de la Lista</th>
+                                    <th class="py-2 px-4 border-b text-left text-gray-600">Descripción</th>
+                                    <th class="py-2 px-4 border-b text-left text-gray-600">Acciones</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach($taskLists as $taskList)
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="py-2 px-4">{{ $taskList->name }}</td>
+                                        <td class="py-2 px-4">{{ $taskList->description }}</td>
+                                        <td class="py-2 px-4 flex space-x-2">
+                                            <a href="{{ route('task-lists.edit', $taskList->id) }}" class="text-blue-500 hover:text-blue-700">Editar</a>
+                                            <form class="delete-form" action="{{ route('task-lists.destroy', $taskList->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="text-red-500 hover:text-red-700 delete-button">Eliminar</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @endif
                 </div>
             </div>
         </div>
