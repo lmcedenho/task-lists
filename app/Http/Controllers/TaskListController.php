@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Repositories\TaskListRepository;
 use App\Repositories\TaskRepository;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Exception;
 
 class TaskListController extends Controller
@@ -72,8 +73,7 @@ class TaskListController extends Controller
             $data = $request->validate([
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
-                'tasks' => 'required|array',
-                'tasks.*.name' => 'required|string|max:255',
+                'tasks' => 'nullable|array'
             ]);
 
             $taskList = $this->taskListRepository->update($id, [
@@ -81,17 +81,30 @@ class TaskListController extends Controller
                 'description' => $data['description']
             ]);
 
-            $existingTaskIds = $taskList->tasks()->pluck('id')->toArray();
-            $updatedTaskIds = collect($data['tasks'])->pluck('id')->toArray();
-
-            foreach ($data['tasks'] as $taskData) {
-                $taskData['task_list_id'] = $taskList->id;
-                $this->taskRepository->create($taskData);
+            if (isset($data['tasks'])) {
+                foreach ($data['tasks'] as $taskData) {
+                    $taskData['task_list_id'] = $taskList->id;
+                    $this->taskRepository->create($taskData);
+                }
             }
 
-            return redirect()->route('task-lists.index')->with('success', 'Lista de tareas actualizada correctamente.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Lista de tareas actualizada correctamente.',
+                'data' => $taskList
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validación fallida.',
+                'errors' => $e->errors(),
+            ], 422);
         } catch (Exception $e) {
-            return redirect()->back()->with('error', 'Error al actualizar la lista de tareas.')->withInput();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la lista de tareas.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 

@@ -21,7 +21,7 @@
     <h3 class="text-lg font-semibold text-gray-800 mt-6">Tareas Nuevas</h3>
     <div v-for="(task, index) in tasks" :key="index" class="mb-4">
       <label class="block text-sm font-semibold text-gray-800">Nueva Tarea {{ index + 1 }}</label>
-      <input v-model="task.name" type="text" required class="mt-1 block w-full p-2 border border-gray-400 rounded-md focus:ring focus:ring-blue-400 focus:outline-none" />
+      <input v-model="task.name" type="text" :required="index > 0" class="mt-1 block w-full p-2 border border-gray-400 rounded-md focus:ring focus:ring-blue-400 focus:outline-none" />
       <button type="button" @click="removeTask(index)" class="mt-1 text-red-600 hover:text-red-800">Eliminar Tarea</button>
     </div>
     <button type="button" @click="addTask" class="float-right text-blue px-4 py-2 rounded mb-4">
@@ -34,14 +34,13 @@
 </template>
 
 <script>
-
 import Swal from 'sweetalert2';
 
 export default {
   props: {
     taskList: Object,
     existingTasks: Array,
-    isEditing: Boolean, // Nueva propiedad para determinar el modo de edición
+    isEditing: Boolean,
   },
   data() {
     return {
@@ -67,26 +66,33 @@ export default {
       const data = {
         name: this.taskList.name,
         description: this.taskList.description,
-        tasks: this.tasks
+        tasks: this.tasks.filter(task => task.name), // Filtrar tareas vacías
       };
-      
+
       try {
+        let response;
         if (this.isEditing) {
-          await axios.put(`/task-lists/${this.taskList.id}`, data);
+          response = await axios.put(`/task-lists/${this.taskList.id}`, data);
         } else {
-          await axios.post('/task-lists', data);
+          response = await axios.post('/task-lists', data);
         }
 
         await this.$swal.fire({
           title: 'Éxito!',
-          text: 'La lista de tareas se ha guardado correctamente.',
+          text: response.data.message || 'La lista de tareas se ha guardado correctamente.',
           icon: 'success',
           confirmButtonText: 'Aceptar',
         });
-        
+
         window.location.href = '/task-lists';
       } catch (error) {
-        console.error('Error al guardar la lista de tareas', error);
+        const errorMessage = error.response?.data?.message || 'Error al guardar la lista de tareas.';
+        await this.$swal.fire({
+          title: 'Error!',
+          text: errorMessage,
+          icon: 'error',
+          confirmButtonText: 'Aceptar',
+        });
       }
     },
   },
