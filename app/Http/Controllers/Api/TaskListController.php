@@ -2,110 +2,58 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Repositories\TaskListRepository;
-use App\Repositories\TaskRepository;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use App\Http\Requests\Api\StoreTaskListRequest;
+use App\Http\Requests\Api\UpdateTaskListRequest;
 use App\Http\Controllers\Controller;
+use App\Services\TaskListService;
 use Exception;
 
 class TaskListController extends Controller
 {
-    protected $taskListRepository;
-    protected $taskRepository;
+    protected $taskListService;
 
-    public function __construct(TaskListRepository $taskListRepository, TaskRepository $taskRepository)
+    public function __construct(TaskListService $taskListService)
     {
-        $this->taskListRepository = $taskListRepository;
-        $this->taskRepository = $taskRepository;
+        $this->taskListService = $taskListService;
     }
 
-    public function store(Request $request)
+    public function store(StoreTaskListRequest $request)
     {
         try {
-            $data = $request->validate([
-                'name' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'tasks' => 'required|array',
-                'tasks.*.name' => 'required|string|max:255',
-            ]);
-
+            $data = $request->validated();
             $ownerId = auth()->id();
-
-            $taskList = $this->taskListRepository->create([
-                'name' => $data['name'],
-                'description' => $data['description'],
-                'owner_id' => $ownerId,
-            ]);
-
-            foreach ($data['tasks'] as $taskData) {
-                $taskData['task_list_id'] = $taskList->id;
-                $this->taskRepository->create($taskData);
-            }
-
-            return redirect()->route('task-lists.index')->with('success', 'Lista de tareas creada correctamente.');
+    
+            $taskList = $this->taskListService->createTaskList($data, $ownerId);
+    
+            return response()->json([
+                'message' => 'Lista de tareas creada correctamente.',
+                'task_list' => $taskList,
+            ], 201);
         } catch (Exception $e) {
-            return redirect()->back()->with('error', 'Error al crear la lista de tareas.')->withInput();
+            return response()->json([
+                'error' => 'Error al crear la lista de tareas.',
+                'details' => $e->getMessage(),
+            ], 400);
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateTaskListRequest $request, $id)
     {
         try {
-            $data = $request->validate([
-                'name' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'tasks' => 'nullable|array'
-            ]);
-
-            $taskList = $this->taskListRepository->update($id, [
-                'name' => $data['name'],
-                'description' => $data['description']
-            ]);
-
-            if (isset($data['tasks'])) {
-                foreach ($data['tasks'] as $taskData) {
-                    $taskData['task_list_id'] = $taskList->id;
-                    $this->taskRepository->create($taskData);
-                }
-            }
+            $data = $request->validated();
+            $taskList = $this->taskListService->updateTaskList($id, $data);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Lista de tareas actualizada correctamente.',
-                'data' => $taskList
+                'data' => $taskList,
             ], 200);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validación fallida.',
-                'errors' => $e->errors(),
-            ], 422);
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al actualizar la lista de tareas.',
                 'error' => $e->getMessage(),
             ], 500);
-        }
-    }
-
-    public function destroy($id)
-    {
-        try {
-            $taskList = $this->taskListRepository->find($id);
-            
-            if (!$taskList) {
-                return redirect()->route('task-lists.index')->with('error', 'Lista de tareas no encontrada.');
-            }
-
-            $this->taskRepository->deleteByTaskListId($id);
-
-            $this->taskListRepository->delete($id);
-
-            return redirect()->route('task-lists.index')->with('success', 'Lista de tareas eliminada correctamente.');
-        } catch (Exception $e) {
-            return redirect()->back()->with('error', 'Error al eliminar la lista de tareas.')->withInput();
         }
     }
 }

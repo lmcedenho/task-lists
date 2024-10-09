@@ -13,6 +13,6 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/tasks/{id}', [TaskController::class, 'destroy'])->name('tasks.destroy');
     Route::resource('task-lists', TaskListController::class)->only([
-        'store', 'update', 'destroy'
+        'store', 'update'
     ]);
 });
