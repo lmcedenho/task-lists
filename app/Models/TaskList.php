@@ -9,7 +9,12 @@ class TaskList extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name', 'description', 'deleted_by'];
+    protected $fillable = ['name', 'description', 'owner_id', 'deleted_by'];
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
 
     public function tasks()
     {

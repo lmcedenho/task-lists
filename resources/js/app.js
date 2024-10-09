@@ -7,6 +7,7 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import { createApp } from 'vue';
+import SweetAlert2 from './plugins/sweetalert2';
 
 /**
  * Next, we will create a fresh Vue application instance. You may then begin
@@ -18,6 +19,8 @@ window.Alpine = Alpine;
 Alpine.start();
 
 const app = createApp({});
+
+app.use(SweetAlert2);
 
 import TaskComponent from './components/TaskComponent.vue';
 app.component('task-component', TaskComponent);

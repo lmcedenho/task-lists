@@ -13,12 +13,10 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('task_list_id');
-            $table->unsignedBigInteger('owner_id');
+            $table->unsignedBigInteger('task_list_id');            
             $table->string('name');
             $table->enum('status', ['pending', 'completed'])->default('pending');
-            $table->foreign('task_list_id')->references('id')->on('task_lists')->onDelete('cascade');
-            $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('task_list_id')->references('id')->on('task_lists')->onDelete('cascade');            
             $table->timestamps();
         });
     }

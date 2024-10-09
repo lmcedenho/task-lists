@@ -26,7 +26,6 @@ class TaskListController extends Controller
 
     public function create()
     {
-        // No es necesario cargar tareas aquí
         return view('task_lists.create');
     }
 
@@ -40,20 +39,16 @@ class TaskListController extends Controller
                 'tasks.*.name' => 'required|string|max:255',
             ]);
 
-            // Obtener el ID del usuario autenticado
             $ownerId = auth()->id();
 
-            // Crear la lista de tareas
             $taskList = $this->taskListRepository->create([
                 'name' => $data['name'],
                 'description' => $data['description'],
-                'owner_id' => $ownerId, // Asigna el owner_id del usuario autenticado
+                'owner_id' => $ownerId,
             ]);
 
-            // Asignar las tareas a la lista
             foreach ($data['tasks'] as $taskData) {
                 $taskData['task_list_id'] = $taskList->id;
-                $taskData['owner_id'] = $ownerId; // Asigna el owner_id a cada tarea
                 $this->taskRepository->create($taskData);
             }
 
@@ -66,7 +61,7 @@ class TaskListController extends Controller
     public function edit($id)
     {
         $taskList = $this->taskListRepository->find($id);
-        $existingTasks = $taskList->tasks; // Obtener las tareas existentes
+        $existingTasks = $taskList->tasks;
 
         return view('task_lists.edit', compact('taskList', 'existingTasks'));
     }
@@ -81,28 +76,41 @@ class TaskListController extends Controller
                 'tasks.*.name' => 'required|string|max:255',
             ]);
 
-            // Obtener el ID del usuario autenticado
-            $ownerId = auth()->id();
-
-            // Actualizar la lista de tareas
             $taskList = $this->taskListRepository->update($id, [
                 'name' => $data['name'],
-                'description' => $data['description'],
-                'owner_id' => $ownerId, // Actualiza el owner_id de la lista de tareas
+                'description' => $data['description']
             ]);
 
-            // Eliminar las tareas actuales
-            $taskList->tasks()->delete();
-            // Crear las nuevas tareas
+            $existingTaskIds = $taskList->tasks()->pluck('id')->toArray();
+            $updatedTaskIds = collect($data['tasks'])->pluck('id')->toArray();
+
             foreach ($data['tasks'] as $taskData) {
                 $taskData['task_list_id'] = $taskList->id;
-                $taskData['owner_id'] = $ownerId; // Asigna el owner_id a cada tarea
                 $this->taskRepository->create($taskData);
             }
 
             return redirect()->route('task-lists.index')->with('success', 'Lista de tareas actualizada correctamente.');
         } catch (Exception $e) {
             return redirect()->back()->with('error', 'Error al actualizar la lista de tareas.')->withInput();
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $taskList = $this->taskListRepository->find($id);
+            
+            if (!$taskList) {
+                return redirect()->route('task-lists.index')->with('error', 'Lista de tareas no encontrada.');
+            }
+
+            $this->taskRepository->deleteByTaskListId($id);
+
+            $this->taskListRepository->delete($id);
+
+            return redirect()->route('task-lists.index')->with('success', 'Lista de tareas eliminada correctamente.');
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', 'Error al eliminar la lista de tareas.')->withInput();
         }
     }
 }
