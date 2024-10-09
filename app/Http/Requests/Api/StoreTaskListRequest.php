@@ -18,6 +18,7 @@ class StoreTaskListRequest extends FormRequest
             'description' => 'nullable|string',
             'tasks' => 'required|array',
             'tasks.*.name' => 'required|string|max:255',
+            'users' => 'nullable|array',
         ];
     }
 
@@ -27,5 +28,10 @@ class StoreTaskListRequest extends FormRequest
             'name.required' => 'El nombre es obligatorio.',
             'tasks.required' => 'Se deben proporcionar tareas.',
         ];
+    }
+
+    public function getUsers()
+    {
+        return $this->has('users') ? collect($this->input('users'))->pluck('id') : null;
     }
 }

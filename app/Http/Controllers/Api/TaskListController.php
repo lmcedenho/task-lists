@@ -24,6 +24,10 @@ class TaskListController extends Controller
             $ownerId = auth()->id();
     
             $taskList = $this->taskListService->createTaskList($data, $ownerId);
+
+            if ($request->has('users')) {
+                $taskList->users()->sync($request->getUsers());
+            }
     
             return response()->json([
                 'message' => 'Lista de tareas creada correctamente.',
