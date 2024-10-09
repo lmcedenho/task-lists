@@ -35,6 +35,7 @@
 
 <script>
 import Swal from 'sweetalert2';
+import { ref, onMounted } from 'vue';
 
 export default {
   props: {
@@ -42,42 +43,78 @@ export default {
     existingTasks: Array,
     isEditing: Boolean,
   },
-  data() {
-    return {
-      tasks: [{ name: '' }],
+  setup(props) {
+    const tasks = ref([{ name: '' }]); // Inicializa con una nueva tarea
+    const existingTasks = ref(props.existingTasks); // Usar la prop existente
+
+    // Función para agregar nueva tarea
+    const addTask = () => {
+      tasks.value.push({ name: '' });
     };
-  },
-  methods: {
-    addTask() {
-      this.tasks.push({ name: '' });
-    },
-    removeTask(index) {
-      this.tasks.splice(index, 1);
-    },
-    async removeExistingTask(taskId) {
-      try {
-        await axios.delete(`/tasks/${taskId}`);
-        this.existingTasks = this.existingTasks.filter(task => task.id !== taskId);
-      } catch (error) {
-        console.error('Error al eliminar la tarea', error);
+
+    // Función para eliminar tarea
+    const removeTask = (index) => {
+      tasks.value.splice(index, 1);
+    };
+
+    // Función para eliminar tarea existente
+    const removeExistingTask = async (taskId) => {
+      // Muestra un diálogo de confirmación
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+      });
+
+      // Si el usuario confirma, proceder a eliminar la tarea
+      if (result.isConfirmed) {
+        try {
+          let response = await axios.delete(`/tasks/${taskId}`);
+
+          // Verifica si la respuesta es exitosa
+          if (response.status === 200) {
+            await Swal.fire({
+              title: 'Éxito!',
+              text: response.data.message || 'Tarea eliminada correctamente.',
+              icon: 'success',
+              confirmButtonText: 'Aceptar',
+            });
+
+            // Filtra la tarea eliminada de la lista existente
+            existingTasks.value = existingTasks.value.filter(task => task.id !== taskId);
+          }
+        } catch (error) {
+          let errorMessage = error.response?.data?.message || 'Error al eliminar la tarea.';
+          await Swal.fire({
+            title: 'Error!',
+            text: errorMessage,
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+          });
+        }
       }
-    },
-    async submitForm() {
+    };
+
+    // Función para enviar el formulario
+    const submitForm = async () => {
       const data = {
-        name: this.taskList.name,
-        description: this.taskList.description,
-        tasks: this.tasks.filter(task => task.name), // Filtrar tareas vacías
+        name: props.taskList.name,
+        description: props.taskList.description,
+        tasks: tasks.value.filter(task => task.name),
       };
 
       try {
         let response;
-        if (this.isEditing) {
-          response = await axios.put(`/task-lists/${this.taskList.id}`, data);
+        if (props.isEditing) {
+          response = await axios.put(`/task-lists/${props.taskList.id}`, data);
         } else {
           response = await axios.post('/task-lists', data);
         }
 
-        await this.$swal.fire({
+        await Swal.fire({
           title: 'Éxito!',
           text: response.data.message || 'La lista de tareas se ha guardado correctamente.',
           icon: 'success',
@@ -86,18 +123,29 @@ export default {
 
         window.location.href = '/task-lists';
       } catch (error) {
-        const errorMessage = error.response?.data?.message || 'Error al guardar la lista de tareas.';
-        await this.$swal.fire({
+        let errorMessage = error.response?.data?.message || 'Error al guardar la lista de tareas.';
+        await Swal.fire({
           title: 'Error!',
           text: errorMessage,
           icon: 'error',
           confirmButtonText: 'Aceptar',
         });
       }
-    },
-  },
-  mounted() {
-    this.tasks = this.tasks || [];
+    };
+
+    // Sincroniza existingTasks al montar el componente
+    onMounted(() => {
+      existingTasks.value = props.existingTasks;
+    });
+
+    return {
+      tasks,
+      existingTasks,
+      addTask,
+      removeTask,
+      removeExistingTask,
+      submitForm,
+    };
   },
 };
 </script>
