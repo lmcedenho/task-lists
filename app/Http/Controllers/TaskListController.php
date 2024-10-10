@@ -23,7 +23,8 @@ class TaskListController extends Controller
 
     public function index()
     {
-        $taskLists = $this->taskListRepository->all();
+        $userId = auth()->id();
+        $taskLists = $this->taskListRepository->getUserTaskLists($userId);
         return view('task_lists.index', compact('taskLists'));
     }
 
