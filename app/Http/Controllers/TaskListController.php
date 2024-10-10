@@ -38,8 +38,9 @@ class TaskListController extends Controller
         $taskList = $this->taskListRepository->find($id);
         $existingTasks = $taskList->tasks;
         $users = $this->userRepository->all();
+        $selectedUsers = $taskList->users;
 
-        return view('task_lists.edit', compact('taskList', 'existingTasks', 'users'));
+        return view('task_lists.edit', compact('taskList', 'existingTasks', 'users', 'selectedUsers'));
     }
 
     public function destroy($id)

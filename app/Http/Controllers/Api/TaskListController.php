@@ -47,6 +47,10 @@ class TaskListController extends Controller
             $data = $request->validated();
             $taskList = $this->taskListService->updateTaskList($id, $data);
 
+            if ($request->has('users')) {
+                $taskList->users()->sync($request->getUsers());
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Lista de tareas actualizada correctamente.',

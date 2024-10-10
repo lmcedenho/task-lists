@@ -31,22 +31,16 @@ import { ref, onMounted, watch } from 'vue'; // Asegúrate de importar onMounted
 export default {
   props: {
     selectedUsers: Array, // Recibe los usuarios seleccionados como prop
+    users: Array, // Recibe todos los usuarios desde el componente padre
   },
   setup(props, { emit }) {
     const searchQuery = ref('');
     const filteredUsers = ref([]);
     const allUsers = ref([]); // Aquí cargarías todos los usuarios desde la API o una fuente de datos
 
-    // Simular usuarios obtenidos de una API
-    const mockUsers = [
-      { id: 1, name: 'Usuario 1' },
-      { id: 2, name: 'Usuario 2' },
-      { id: 3, name: 'Usuario 3' },
-      // Agrega más usuarios aquí
-    ];
-
+    // Usar la prop `users` para inicializar `allUsers`
     onMounted(() => {
-      allUsers.value = mockUsers; // Aquí podrías hacer una llamada a la API para obtener usuarios reales
+      allUsers.value = props.users; // Usar usuarios recibidos como prop
     });
 
     // Función para filtrar usuarios según la búsqueda

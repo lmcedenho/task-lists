@@ -10,7 +10,15 @@
     </div>
 
     <!-- Selector de usuarios -->
-    <user-selector :selected-users="selectedUsers" @update:selected-users="updateSelectedUsers" />
+    <user-selector :selected-users="selectedUsers" :users="users" @update:selected-users="updateSelectedUsers" />
+
+    <!-- Mostrar usuarios seleccionados -->
+    <div class="mb-4">
+      <h3 class="text-lg font-semibold text-gray-800">Usuarios Asociados</h3>
+      <ul>
+        <li v-for="user in selectedUsers" :key="user.id" class="text-gray-600">{{ user.name }}</li>
+      </ul>
+    </div>
 
     <h3 class="text-lg font-semibold text-gray-800" v-if="isEditing">Tareas Existentes</h3>
     <div v-if="isEditing && existingTasks.length" v-for="(task, index) in existingTasks" :key="task.id" class="mb-4 flex items-center justify-between">
@@ -48,10 +56,11 @@ export default {
     taskList: Object,
     existingTasks: Array,
     isEditing: Boolean,
+    users: Array, // Agrega una prop para los usuarios
   },
   setup(props) {
     const tasks = ref([{ name: '' }]); // Inicializa con una nueva tarea
-    const selectedUsers = ref([]); // Estado para usuarios seleccionados
+    const selectedUsers = ref(props.taskList.users || []); // Inicializa con los usuarios de la lista de tareas
     const existingTasks = ref(props.existingTasks); // Usar la prop existente
 
     // Función para agregar nueva tarea

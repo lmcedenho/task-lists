@@ -6,7 +6,9 @@
             <task-component 
                 :task-list="{{ json_encode($taskList) }}" 
                 :existing-tasks="{{ json_encode($existingTasks) }}" 
-                :is-editing="true" 
+                :is-editing="true"
+                :users="{{ json_encode($users) }}"
+                :selected-users="{{ json_encode($selectedUsers) }}" 
             />
             </div>
         </div>
