@@ -30,8 +30,8 @@ class StoreTaskListRequest extends FormRequest
         ];
     }
 
-    public function getUsers()
+    public function getUsers(): array
     {
-        return $this->has('users') ? collect($this->input('users'))->pluck('id') : null;
+        return $this->has('users') ? collect($this->input('users'))->pluck('id')->toArray() : null;
     }
 }

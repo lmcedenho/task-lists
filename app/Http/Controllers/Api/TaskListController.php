@@ -26,7 +26,7 @@ class TaskListController extends Controller
             $taskList = $this->taskListService->createTaskList($data, $ownerId);
 
             if ($request->has('users')) {
-                $taskList->users()->sync($request->getUsers());
+                $this->taskListService->assignUsersToTaskList($taskList, $request->getUsers());
             }
     
             return response()->json([
@@ -48,7 +48,7 @@ class TaskListController extends Controller
             $taskList = $this->taskListService->updateTaskList($id, $data);
 
             if ($request->has('users')) {
-                $taskList->users()->sync($request->getUsers());
+                $this->taskListService->assignUsersToTaskList($taskList, $request->getUsers());
             }
 
             return response()->json([

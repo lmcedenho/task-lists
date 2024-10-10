@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\TaskListRepository;
 use App\Repositories\TaskRepository;
+use App\Models\TaskList;
 
 class TaskListService
 {
@@ -47,5 +48,10 @@ class TaskListService
         }
 
         return $taskList;
+    }
+
+    public function assignUsersToTaskList(TaskList $taskList, array $users)
+    {
+        $taskList->users()->sync($users);
     }
 }
