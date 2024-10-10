@@ -18,10 +18,15 @@ class TaskListRepository extends BaseRepository
 
     public function getUserTaskLists($userId)
     {
-        return TaskList::where('owner_id', $userId)
+        return $this->model->where('owner_id', $userId)
             ->orWhereHas('permissions', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
             ->get();
+    }
+
+    public function getUserIdsFromTaskList(TaskList $taskList)
+    {
+        return $taskList->users()->pluck('users.id')->toArray();
     }
 }

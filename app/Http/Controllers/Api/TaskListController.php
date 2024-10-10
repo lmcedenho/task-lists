@@ -6,6 +6,7 @@ use App\Http\Requests\Api\StoreTaskListRequest;
 use App\Http\Requests\Api\UpdateTaskListRequest;
 use App\Http\Controllers\Controller;
 use App\Services\TaskListService;
+use App\Jobs\SendTaskListNotification;
 use Exception;
 
 class TaskListController extends Controller
@@ -19,49 +20,48 @@ class TaskListController extends Controller
 
     public function store(StoreTaskListRequest $request)
     {
-        try {
-            $data = $request->validated();
-            $ownerId = auth()->id();
-    
-            $taskList = $this->taskListService->createTaskList($data, $ownerId);
-
-            if ($request->has('users')) {
-                $this->taskListService->assignUsersToTaskList($taskList, $request->getUsers());
-            }
-    
-            return response()->json([
-                'message' => 'Lista de tareas creada correctamente.',
-                'task_list' => $taskList,
-            ], 201);
-        } catch (Exception $e) {
-            return response()->json([
-                'error' => 'Error al crear la lista de tareas.',
-                'details' => $e->getMessage(),
-            ], 400);
-        }
+        return $this->handleTaskList($request, 'created');
     }
 
     public function update(UpdateTaskListRequest $request, $id)
     {
+        return $this->handleTaskList($request, 'updated', $id);
+    }
+
+    private function handleTaskList($request, $action, $id = null)
+    {
         try {
             $data = $request->validated();
-            $taskList = $this->taskListService->updateTaskList($id, $data);
+            $ownerId = auth()->id();
+
+            if ($action === 'created') {
+                $taskList = $this->taskListService->createTaskList($data, $ownerId);
+            } else {
+                $taskList = $this->taskListService->updateTaskList($id, $data);
+            }
+
+            $notificationData = [
+                'id' => $taskList->id,
+                'name' => $taskList->name
+            ];
 
             if ($request->has('users')) {
-                $this->taskListService->assignUsersToTaskList($taskList, $request->getUsers());
+                $users = $request->getUsers();
+                $this->taskListService->assignUsersToTaskList($taskList, $users);
+                SendTaskListNotification::dispatch($notificationData, $users, $action);
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Lista de tareas actualizada correctamente.',
+                'message' => $action === 'create' ? 'Lista de tareas creada correctamente.' : 'Lista de tareas actualizada correctamente.',
                 'data' => $taskList,
-            ], 200);
+            ], $action === 'create' ? 201 : 200);
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar la lista de tareas.',
+                'message' => $action === 'create' ? 'Error al crear la lista de tareas.' : 'Error al actualizar la lista de tareas.',
                 'error' => $e->getMessage(),
-            ], 500);
+            ], $action === 'create' ? 400 : 500);
         }
     }
 }

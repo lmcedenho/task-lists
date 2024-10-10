@@ -10,4 +10,9 @@ class UserRepository extends BaseRepository
     {
         parent::__construct($user);
     }
+
+    public function getUsersByIds(array $ids)
+    {
+        return $this->model->whereIn('id', $ids);
+    }
 }

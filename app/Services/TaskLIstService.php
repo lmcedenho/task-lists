@@ -52,6 +52,6 @@ class TaskListService
 
     public function assignUsersToTaskList(TaskList $taskList, array $users)
     {
-        $taskList->users()->sync($users);
+        $taskList->users()->sync($users);        
     }
 }
