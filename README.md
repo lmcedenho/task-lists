@@ -102,3 +102,13 @@ php artisan test
 
 Contributions are welcome. If you would like to contribute to this project, please open an issue or submit a pull request.
 
+⚠️ Warning: .env.testing and phpunit.xml Files
+IMPORTANT: The .env.testing and phpunit.xml files have been included in this repository for illustrative purposes only and should NOT be uploaded or used in a production environment.
+
+.env.testing: This file contains configurations specific to the testing environment, such as the testing database and other sensitive variables that are not safe or suitable for production.
+phpunit.xml: This file configures the testing environment and is intended only for unit and integration tests. It should not be executed in production environments.
+
+Recommended actions:
+
+Ensure that these files are excluded from production deployments by using .gitignore.
+These files should be used only in local, development, testing environments, or in CI/CD pipelines.
