@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Models\TaskList;
 use App\Notifications\TaskListNotification;
 use App\Repositories\UserRepository;
 use Illuminate\Bus\Queueable;
@@ -15,13 +14,13 @@ class SendTaskListNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $taskList;
+    protected $taskListData;
     protected $userIds;
     protected $action;
 
-    public function __construct(TaskList $taskList, array $userIds, string $action)
+    public function __construct(array $taskListData, array $userIds, string $action)
     {
-        $this->taskList = $taskList;
+        $this->taskListData = $taskListData;
         $this->userIds = $userIds;
         $this->action = $action;
     }
@@ -32,7 +31,7 @@ class SendTaskListNotification implements ShouldQueue
 
         $userRepository->getUsersByIds($this->userIds)->chunk($chunkSize, function ($usersChunk) {
             foreach ($usersChunk as $user) {
-                $user->notify(new TaskListNotification($this->taskList, $this->action));
+                $user->notify(new TaskListNotification($this->taskListData, $this->action));
             }
         });
     }
