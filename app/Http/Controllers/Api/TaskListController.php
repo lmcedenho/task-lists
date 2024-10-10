@@ -53,15 +53,16 @@ class TaskListController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => $action === 'create' ? 'Lista de tareas creada correctamente.' : 'Lista de tareas actualizada correctamente.',
+                'message' => $action === 'created' ? 'Lista de tareas creada correctamente.' : 'Lista de tareas actualizada correctamente.',
                 'data' => $taskList,
-            ], $action === 'create' ? 201 : 200);
+            ], $action === 'created' ? 201 : 200);
         } catch (Exception $e) {
+            \Log::error('Error creating/updating task list: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => $action === 'create' ? 'Error al crear la lista de tareas.' : 'Error al actualizar la lista de tareas.',
+                'message' => $action === 'created' ? 'Error al crear la lista de tareas.' : 'Error al actualizar la lista de tareas.',
                 'error' => $e->getMessage(),
-            ], $action === 'create' ? 400 : 500);
+            ], $action === 'created' ? 400 : 500);
         }
     }
 }

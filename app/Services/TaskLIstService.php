@@ -21,7 +21,7 @@ class TaskListService
     {
         $taskList = $this->taskListRepository->create([
             'name' => $data['name'],
-            'description' => $data['description'],
+            'description' => $data['description'] ?? '',
             'owner_id' => $ownerId,
         ]);
 
@@ -37,7 +37,7 @@ class TaskListService
     {
         $taskList = $this->taskListRepository->update($id, [
             'name' => $data['name'],
-            'description' => $data['description']
+            'description' => $data['description'] ?? ''
         ]);
 
         if (isset($data['tasks'])) {
