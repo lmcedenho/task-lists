@@ -25,6 +25,9 @@ app.use(SweetAlert2);
 import TaskComponent from './components/TaskComponent.vue';
 app.component('task-component', TaskComponent);
 
+import UserSelector from './components/UserSelector.vue';
+app.component('user-selector', UserSelector);
+
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue

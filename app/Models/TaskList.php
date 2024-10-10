@@ -16,6 +16,13 @@ class TaskList extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'task_list_permissions')
+            ->withPivot('can_update', 'can_delete', 'token', 'expires_at')
+            ->withTimestamps();
+    }
+
     public function tasks()
     {
         return $this->hasMany(Task::class);

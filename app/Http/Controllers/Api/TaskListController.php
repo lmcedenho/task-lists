@@ -24,6 +24,10 @@ class TaskListController extends Controller
             $ownerId = auth()->id();
     
             $taskList = $this->taskListService->createTaskList($data, $ownerId);
+
+            if ($request->has('users')) {
+                $taskList->users()->sync($request->getUsers());
+            }
     
             return response()->json([
                 'message' => 'Lista de tareas creada correctamente.',
@@ -42,6 +46,10 @@ class TaskListController extends Controller
         try {
             $data = $request->validated();
             $taskList = $this->taskListService->updateTaskList($id, $data);
+
+            if ($request->has('users')) {
+                $taskList->users()->sync($request->getUsers());
+            }
 
             return response()->json([
                 'success' => true,

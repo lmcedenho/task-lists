@@ -9,6 +9,17 @@
       <textarea v-model="taskList.description" class="mt-1 block w-full p-2 border border-gray-400 rounded-md focus:ring focus:ring-blue-400 focus:outline-none"></textarea>
     </div>
 
+    <!-- Selector de usuarios -->
+    <user-selector :selected-users="selectedUsers" :users="users" @update:selected-users="updateSelectedUsers" />
+
+    <!-- Mostrar usuarios seleccionados -->
+    <div class="mb-4">
+      <h3 class="text-lg font-semibold text-gray-800">Usuarios Asociados</h3>
+      <ul>
+        <li v-for="user in selectedUsers" :key="user.id" class="text-gray-600">{{ user.name }}</li>
+      </ul>
+    </div>
+
     <h3 class="text-lg font-semibold text-gray-800" v-if="isEditing">Tareas Existentes</h3>
     <div v-if="isEditing && existingTasks.length" v-for="(task, index) in existingTasks" :key="task.id" class="mb-4 flex items-center justify-between">
       <label class="block text-sm font-semibold text-gray-800">{{ task.name }}</label>
@@ -45,9 +56,11 @@ export default {
     taskList: Object,
     existingTasks: Array,
     isEditing: Boolean,
+    users: Array, // Agrega una prop para los usuarios
   },
   setup(props) {
     const tasks = ref([{ name: '' }]); // Inicializa con una nueva tarea
+    const selectedUsers = ref(props.taskList.users || []); // Inicializa con los usuarios de la lista de tareas
     const existingTasks = ref(props.existingTasks); // Usar la prop existente
 
     // Función para agregar nueva tarea
@@ -62,7 +75,6 @@ export default {
 
     // Función para eliminar tarea existente
     const removeExistingTask = async (taskId) => {
-      // Muestra un diálogo de confirmación
       const result = await Swal.fire({
         title: '¿Estás seguro?',
         text: 'Esta acción no se puede deshacer.',
@@ -72,12 +84,10 @@ export default {
         cancelButtonText: 'Cancelar',
       });
 
-      // Si el usuario confirma, proceder a eliminar la tarea
       if (result.isConfirmed) {
         try {
           let response = await axios.delete(`/api/tasks/${taskId}`);
 
-          // Verifica si la respuesta es exitosa
           if (response.status === 200) {
             await Swal.fire({
               title: 'Éxito!',
@@ -86,14 +96,12 @@ export default {
               confirmButtonText: 'Aceptar',
             });
 
-            // Filtra la tarea eliminada de la lista existente
             existingTasks.value = existingTasks.value.filter(task => task.id !== taskId);
           }
         } catch (error) {
-          let errorMessage = error.response?.data?.message || 'Error al eliminar la tarea.';
           await Swal.fire({
             title: 'Error!',
-            text: errorMessage,
+            text: error.response?.data?.message || 'Error al eliminar la tarea.',
             icon: 'error',
             confirmButtonText: 'Aceptar',
           });
@@ -107,6 +115,7 @@ export default {
         name: props.taskList.name,
         description: props.taskList.description,
         tasks: tasks.value.filter(task => task.name),
+        users: selectedUsers.value, // Incluye los usuarios seleccionados
       };
 
       try {
@@ -126,14 +135,18 @@ export default {
 
         window.location.href = '/task-lists';
       } catch (error) {
-        let errorMessage = error.response?.data?.message || 'Error al guardar la lista de tareas.';
         await Swal.fire({
           title: 'Error!',
-          text: errorMessage,
+          text: error.response?.data?.message || 'Error al guardar la lista de tareas.',
           icon: 'error',
           confirmButtonText: 'Aceptar',
         });
       }
+    };
+
+    // Función para actualizar los usuarios seleccionados
+    const updateSelectedUsers = (users) => {
+      selectedUsers.value = users;
     };
 
     // Sincroniza existingTasks al montar el componente
@@ -143,11 +156,13 @@ export default {
 
     return {
       tasks,
+      selectedUsers,
       existingTasks,
       addTask,
       removeTask,
       removeExistingTask,
       submitForm,
+      updateSelectedUsers,
     };
   },
 };

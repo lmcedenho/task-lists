@@ -17,6 +17,12 @@ class UpdateTaskListRequest extends FormRequest
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'tasks' => 'nullable|array',
+            'users' => 'nullable|array',
         ];
+    }
+
+    public function getUsers()
+    {
+        return $this->has('users') ? collect($this->input('users'))->pluck('id') : null;
     }
 }
