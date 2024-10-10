@@ -6,6 +6,7 @@ use App\Http\Requests\Api\StoreTaskListRequest;
 use App\Http\Requests\Api\UpdateTaskListRequest;
 use App\Http\Controllers\Controller;
 use App\Services\TaskListService;
+use App\Jobs\SendTaskListNotification;
 use Exception;
 
 class TaskListController extends Controller
@@ -26,7 +27,9 @@ class TaskListController extends Controller
             $taskList = $this->taskListService->createTaskList($data, $ownerId);
 
             if ($request->has('users')) {
-                $this->taskListService->assignUsersToTaskList($taskList, $request->getUsers());
+                $users = $request->getUsers();
+                $this->taskListService->assignUsersToTaskList($taskList, $users);
+                SendTaskListNotification::dispatch($taskList, $users, 'created');
             }
     
             return response()->json([
@@ -48,7 +51,9 @@ class TaskListController extends Controller
             $taskList = $this->taskListService->updateTaskList($id, $data);
 
             if ($request->has('users')) {
-                $this->taskListService->assignUsersToTaskList($taskList, $request->getUsers());
+                $users = $request->getUsers();
+                $this->taskListService->assignUsersToTaskList($taskList, $users);
+                SendTaskListNotification::dispatch($taskList, $users, 'updated');
             }
 
             return response()->json([

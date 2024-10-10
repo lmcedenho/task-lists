@@ -92,6 +92,9 @@ Make sure you have installed:
 
    Open your browser and go to `http://localhost:8000`. You can register as a new user.
 
+## Run Notifications
+php artisan queue:work
+
 ## Contributions
 
 Contributions are welcome. If you would like to contribute to this project, please open an issue or submit a pull request.
