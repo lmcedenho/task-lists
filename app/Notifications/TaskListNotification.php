@@ -57,8 +57,7 @@ class TaskListNotification extends Notification implements ShouldQueue
             ->line($title . ' ' . $name);
 
         if ($this->action !== 'deleted') {
-            //->action('Ver Lista', url('/task-lists/' . $this->taskList->id))
-            $mailMessage->action('Ver Lista', url('/task-lists/'));
+            $mailMessage->action('Ver Lista', url('/task-lists/' . $id));
         }
         
         $mailMessage->line('Gracias por usar nuestra aplicación!');

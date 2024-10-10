@@ -28,6 +28,17 @@ class TaskListController extends Controller
         return view('task_lists.index', compact('taskLists'));
     }
 
+    public function show($id)
+    {
+        $taskList = $this->taskListRepository->withTasks($id);
+
+        if (!$taskList) {
+            return redirect()->route('task-lists.index')->with('error', 'Lista de tareas no encontrada.');
+        }
+
+        return view('task_lists.show', compact('taskList'));
+    }
+
     public function create()
     {
         $users = $this->userRepository->all();
